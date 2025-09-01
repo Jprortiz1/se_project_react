@@ -22,35 +22,46 @@ export default function App() {
   const [weather, setWeather] = useState(null);
 
   // load weather on mount
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const data = await fetchWeatherByCoords(latitude, longitude);
-          setWeather(data);
-          // setWeather({ temp: 70, city: "Unknown" });
-          console.log(data);
-        } catch (err) {
-          console.error("Weather fetch failed:", err);
-        }
-      },
-      (err) => {
-        console.error("Geolocation error:", err);
-        // fallback weather if geolocation fails
-        setWeather({ temp: 70, city: "Unknown" });
-      }
-    );
-  }, []);
+useEffect(() => {
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const data = await fetchWeatherByCoords(latitude, longitude);
+        setWeather(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Weather fetch failed:", err);
 
-  // normaliza { _id, link, weather } → { id, imageUrl, weather: lowercase }
-  const normalizedDefaults = defaultClothingItems.map((c) => ({
-    id: c._id ?? c.id,
-    name: c.name,
-    imageUrl: c.link ?? c.imageUrl,
-    weather:
-      typeof c.weather === "string" ? c.weather.toLowerCase() : c.weather,
-  }));
+        // ✅ Fallback: muestra algo por defecto
+        setWeather({
+          main: { temp: 70 }, // temperatura default
+          name: "Unknown city", 
+          weather: [{ description: "Clear sky" }], 
+        });
+      }
+    },
+    (err) => {
+      console.error("Geolocation error:", err);
+
+      setWeather({
+        main: { temp: 70 },
+        name: "Unknown city",
+        weather: [{ description: "Clear sky" }],
+      });
+    }
+  );
+}, []);
+
+
+// normaliza { _id, name, link, weather } → { id, name, imageUrl, weather: lowercase }
+const normalizedDefaults = defaultClothingItems.map((clothingItem) => ({
+  id: clothingItem._id,
+  name: clothingItem.name,          // 👈 agrega esto
+  imageUrl: clothingItem.link,
+  weather: clothingItem.weather.toLowerCase(),
+}));
+
 
   // items en state desde el montaje
   const [items, setItems] = useState(normalizedDefaults);
@@ -71,22 +82,38 @@ export default function App() {
   };
 
   // cerrar modales con ESC
-  useEffect(() => {
-    if (!activeModal) return;
-    const onEsc = (e) => e.key === "Escape" && handleCloseModal();
-    document.addEventListener("keydown", onEsc);
-    return () => document.removeEventListener("keydown", onEsc);
-  }, [activeModal]);
+useEffect(() => {
+  if (!activeModal) return;
+  const onEsc = (e) => e.key === "Escape" && handleCloseModal();
+  document.addEventListener("keydown", onEsc);
+  return () => document.removeEventListener("keydown", onEsc);
+}, [activeModal]);
 
-  // filtrado por clima
-  const type = getWeatherType(weather?.temp);
-  const filtered = items.filter((i) => i.weather === type);
+// obtenemos la temperatura de forma segura
+const temp =
+  weather?.temp ??          // si normalizaste tu objeto
+  weather?.main?.temp ??    // si usas la forma cruda de OpenWeather
+  null;
 
-  // usuario simulado
-  const user = {
-    name: "Terrence Tegegne",
-    avatar: avatar,
-  };
+// si no hay clima aún → mostramos un loading state
+if (temp == null) {
+  return (
+    <main className="main">
+      <h2 className="main__lead">Cargando clima y recomendaciones…</h2>
+    </main>
+  );
+}
+
+// si ya hay clima → filtramos normalmente
+const type = getWeatherType(temp);
+const filtered = items.filter((i) => i.weather === type);
+
+// usuario simulado
+const user = {
+  name: "Terrence Tegegne",
+  avatar: avatar,
+};
+
 
   return (
     <div className="page">
