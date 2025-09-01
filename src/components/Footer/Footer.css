@@ -1,0 +1,13 @@
+.footer {
+  width: 100%;
+  padding: 20px 22px;
+}
+
+.footer__inner {
+  width: 100%;
+  max-width: 1440px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 500;
+}

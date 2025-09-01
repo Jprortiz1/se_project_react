@@ -1,0 +1,69 @@
+/* barra azul 1360×80, radio 12, color #00A3FF */
+.weather-card {
+  height: 80px;
+  width: 100%;
+}
+
+.weather-card__inner {
+  width: 100%;
+  height: 80px;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.weather-card__temp {
+  color: #fff;
+  font-weight: 700;
+  font-size: 36px;
+  z-index: 1;
+  margin-left: 20px;
+}
+
+/* arte (sol+nube) pegado arriba-derecha */
+.weather-card__art {
+  position: absolute;
+}
+
+.weather-card__inner .cloudy {
+  right: 0;
+  bottom: -7px;
+}
+
+.sunny {
+  background-color: #00a3ff;
+}
+
+.cloudy {
+  background-color: #00a3ff;
+}
+
+.rain {
+  background-color: #6ca6c7;
+}
+
+.strom {
+  background-color: #6ca6c7;
+}
+
+.snow {
+  background-color: #6ca6c7;
+}
+
+.fog {
+  background-color: #6ca6c7;
+}
+
+/* Responsive fino (opcional) */
+@media (max-width: 560px) {
+  .weather-card__temp {
+    font-size: 24px;
+  }
+  .weather-card__art {
+    right: 8px;
+  }
+}

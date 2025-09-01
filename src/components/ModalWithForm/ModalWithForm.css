@@ -1,0 +1,171 @@
+/* src/components/ModalWithForm/ModalWithForm.css */
+
+/* Overlay */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  font-size: 16px;
+}
+.modal * {
+  font-size: 16px !important;
+}
+.modal_is-opened {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Caja del modal */
+.modal__content {
+  position: relative;
+  background: #fff;
+  color: #111;
+  width: min(520px, 92vw);
+  border-radius: 16px;
+  padding: 20px 22px 18px;
+  box-sizing: border-box;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+/* Header */
+.modal__title {
+  margin: 0 0 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Form */
+.mform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mform .form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* Etiquetas */
+.mform .form__field > span {
+  font-weight: 600;
+  color: #111;
+}
+
+/* Inputs de texto: 440x52, borde 1px (Figma) */
+.mform .form__control {
+  width: 100%;
+  height: 24px;
+  font-weight: 700;
+  border: none;
+  border-bottom: 1px solid #000000;
+  background: #fff;
+  line-height: 1.2;
+  outline: none;
+}
+.mform .form__control::placeholder {
+  color: #9ca3af;
+}
+
+/* Radios */
+.mform fieldset.form__field {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.mform fieldset legend {
+  font-weight: 600;
+  margin: 2px 0 6px;
+  width: 100% !important;
+}
+.mform .form__radios {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.mform .form__radios label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.mform input[type="radio"] {
+  accent-color: #111;
+}
+
+/* Botón */
+.btn {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn[disabled] {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* === Weather group exacto según Figma === */
+.mform .form__weather {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.mform .form__weather legend {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.mform .form__weather .form__radios {
+  display: flex;
+  flex-direction: column; /* opciones en columna */
+  gap: 12px;
+}
+
+/* Radio + texto */
+.mform .radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+}
+
+.mform .radio input {
+  width: 18px;
+  height: 18px;
+  accent-color: #111; /* color del seleccionado */
+}
+
+/* Texto “apagado” por defecto, oscuro cuando está checked */
+.mform .radio span {
+  font-weight: 600;
+  color: #6b7280;
+  margin-top: 4px;
+}
+.mform .radio input:checked + span {
+  color: #111;
+}

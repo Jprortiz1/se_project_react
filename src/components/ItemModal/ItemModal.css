@@ -1,0 +1,88 @@
+/* Backdrop */
+.modal-item {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid !important;
+  place-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  z-index: 9999;
+}
+
+/* Caja del modal (bordes redondeados y sombra como Figma) */
+.modal-item__box {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100dvh - 100px);
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden; /* recorta la imagen en las esquinas */
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Botón cerrar blanco encima de la imagen */
+.modal-item__close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+/* === IMAGEN COMO EN FIGMA === */
+/* Nada de fondo gris ni padding aquí */
+.modal-item__media {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 400px;
+  height: 400px;
+}
+
+/* La imagen ocupa el ancho del modal y no se deforma ni desborda */
+.modal-item__media img {
+  display: block; /* elimina gap bajo la imagen */
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* mantiene proporción */
+}
+
+/* Franja blanca inferior */
+.modal-item__info {
+  background: #fff;
+  padding: 16px 20px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.modal-item__title {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #111;
+}
+.modal-item__meta {
+  margin: 0;
+  color: #444;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 420px) {
+  .modal-item__box {
+    width: 96vw;
+  }
+  .modal-item__close {
+    top: 8px;
+    right: 10px;
+  }
+}
