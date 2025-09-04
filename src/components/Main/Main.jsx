@@ -1,15 +1,9 @@
-// Main.jsx
+// src/components/Main/Main.jsx
 import { useMemo } from "react";
 import WeatherCard from "../WeatherCard/WeatherCard";
 import ItemCard from "../ItemCard/ItemCard";
 import "./Main.css";
-
-// helper (puedes moverlo a utils/constants.js)
-const getWeatherType = (tempF) => {
-  if (tempF <= 59) return "cold";
-  if (tempF >= 75) return "hot";
-  return "warm";
-};
+import { getWeatherType } from "../../utils/weatherApi"; // ✅ usar lógica centralizada
 
 export default function Main({ weatherData, items, onSelectCard }) {
   // Soporta ambas formas: normalizada {temp} o cruda {main.temp}
@@ -30,7 +24,8 @@ export default function Main({ weatherData, items, onSelectCard }) {
     );
   }
 
-  const weatherType = getWeatherType(temp);
+  // Usa el type si ya viene normalizado; si no, clasifícalo aquí con la fn centralizada
+  const weatherType = weatherData?.type ?? getWeatherType(temp);
 
   // Filtrar solo cuando ya hay temperatura
   const filteredItems = useMemo(
@@ -54,10 +49,7 @@ export default function Main({ weatherData, items, onSelectCard }) {
           <ul className="cards">
             {filteredItems.map((item) => (
               <li key={item.id} className="cards__item">
-                <ItemCard
-                  item={item}
-                  onSelect={() => onSelectCard(item)}
-                />
+                <ItemCard item={item} onSelect={() => onSelectCard(item)} />
               </li>
             ))}
           </ul>

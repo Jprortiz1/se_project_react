@@ -19,13 +19,18 @@ export default function Header({ weatherData, user, onAddClothes }) {
         </div>
 
         <div className="header__right">
-          <button className="header__add" onClick={onAddClothes}>
+          <button
+            type="button"
+            className="header__add"
+            onClick={onAddClothes}
+          >
             + Add clothes
           </button>
-          <span className="header__name">{user.name}</span>
+          <p className="header__name">{user.name}</p>
           <img className="header__avatar" src={user.avatar} alt={user.name} />
         </div>
       </div>
     </header>
   );
 }
+
