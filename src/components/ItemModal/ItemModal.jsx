@@ -1,7 +1,7 @@
 import "./ItemModal.css";
 import closeIcon from "../../assets/icons/close-icon.svg";
 
-export default function ItemModal({ isOpen, item, onClose }) {
+export default function ItemModal({ isOpen, item, onClose, onDelete }) {
   if (!isOpen || !item) return null;
 
   const handleBackdrop = (e) => {
@@ -28,7 +28,16 @@ export default function ItemModal({ isOpen, item, onClose }) {
           <img src={item.imageUrl || item.link} alt={item.name} />
         </div>
         <div className="modal-item__info">
-          <h3 className="modal-item__title">{item.name}</h3>
+          <div className="modal-item__titles">
+            <h3 className="modal-item__title">{item.name}</h3>
+            <button
+              type="button"
+              className="modal-item__delete"
+              onClick={() => onDelete(item)}
+            >
+              Delete Item
+            </button>
+          </div>
           <p className="modal-item__meta">
             Weather: {String(item.weather).toLowerCase()}
           </p>

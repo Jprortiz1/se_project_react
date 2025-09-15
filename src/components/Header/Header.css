@@ -44,3 +44,12 @@
   height: 40px;
   border-radius: 50%;
 }
+
+.header__profile {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+}

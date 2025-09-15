@@ -169,3 +169,27 @@
 .mform .radio input:checked + span {
   color: #111;
 }
+
+.modal-item__title {
+  margin-bottom: 0 !important;
+}
+
+.modal-item__titles {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.modal-item__titles .modal-item__delete {
+  color: #ff4d00;
+  background: none;
+  border: none;
+  outline: none;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}

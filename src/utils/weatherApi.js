@@ -1,4 +1,3 @@
-
 // src/utils/weatherApi.js
 const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
 const BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
@@ -36,7 +35,9 @@ function mapCondition(main = "") {
 export function normalizeWeatherData(data) {
   if (!data) return null;
 
-  const temp = data.main?.temp ?? null;
+  const temp = data.main?.temp ?? null; // Fahrenheit
+  const tempC = temp != null ? Math.round(((temp - 32) * 5) / 9) : null; // Celsius
+
   const tempType = temp != null ? getWeatherType(temp) : "warm"; // fallback
   const main = data.weather?.[0]?.main ?? "";
   const condition = mapCondition(main);
@@ -50,15 +51,16 @@ export function normalizeWeatherData(data) {
     currentTime >= sunrise && currentTime < sunset ? "day" : "night";
 
   return {
-    temp,                                     // número (Fahrenheit)
+    temp,
+    tempC,
     city: data.name ?? "Unknown",
     description: data.weather?.[0]?.description ?? "N/A",
     icon: data.weather?.[0]?.icon ?? null,
     // 🔑 Lo que tu app usa para filtrar ropa:
-    type: tempType,                            // "hot" | "warm" | "cold"
+    type: tempType, // "hot" | "warm" | "cold"
     // Extra por si lo necesitas en la UI:
-    condition,                                 // "sunny" | "cloudy" | ...
-    dayOrNight,                                // "day" | "night"
+    condition, // "sunny" | "cloudy" | ...
+    dayOrNight, // "day" | "night"
   };
 }
 

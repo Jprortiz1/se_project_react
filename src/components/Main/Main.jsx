@@ -1,16 +1,23 @@
 // src/components/Main/Main.jsx
-import { useMemo } from "react";
+import { useContext } from "react";
 import WeatherCard from "../WeatherCard/WeatherCard";
-import ItemCard from "../ItemCard/ItemCard";
+// import ItemCard from "../ItemCard/ItemCard";
 import "./Main.css";
-import { getWeatherType } from "../../utils/weatherApi"; // ✅ usar lógica centralizada
+// import { getWeatherType } from "../../utils/weatherApi"; // ✅ usar lógica centralizada
+import CurrentTemperatureUnitContext from "../../contexts/CurrentTemperatureUnitContext";
+import ClothesSection from "../ClothesSection/ClothesSection";
 
 export default function Main({ weatherData, items, onSelectCard }) {
   // Soporta ambas formas: normalizada {temp} o cruda {main.temp}
+  // const temp =
+  //   weatherData?.temp ??
+  //   weatherData?.main?.temp ??
+  //   null;
+
+  const { currentTemperatureUnit } = useContext(CurrentTemperatureUnitContext);
+
   const temp =
-    weatherData?.temp ??
-    weatherData?.main?.temp ??
-    null;
+    currentTemperatureUnit === "C" ? weatherData?.tempC : weatherData?.temp;
 
   // Loading/fallback temprano: no renderices recomendaciones sin clima
   if (temp == null) {
@@ -25,13 +32,7 @@ export default function Main({ weatherData, items, onSelectCard }) {
   }
 
   // Usa el type si ya viene normalizado; si no, clasifícalo aquí con la fn centralizada
-  const weatherType = weatherData?.type ?? getWeatherType(temp);
-
-  // Filtrar solo cuando ya hay temperatura
-  const filteredItems = useMemo(
-    () => items.filter((item) => item.weather === weatherType),
-    [items, weatherType]
-  );
+  // const weatherType = weatherData?.type ?? getWeatherType(temp);
 
   return (
     <main className="main">
@@ -41,7 +42,7 @@ export default function Main({ weatherData, items, onSelectCard }) {
           Today is {Math.round(temp)}° F / You may want to wear:
         </h2>
 
-        {filteredItems.length === 0 ? (
+        {/* {filteredItems.length === 0 ? (
           <p className="items__empty">
             No hay prendas para el clima <strong>{weatherType}</strong>.
           </p>
@@ -53,7 +54,12 @@ export default function Main({ weatherData, items, onSelectCard }) {
               </li>
             ))}
           </ul>
-        )}
+        )} */}
+        <ClothesSection
+          items={items}
+          weatherType={weatherData?.type}
+          onSelectCard={onSelectCard}
+        />
       </div>
     </main>
   );

@@ -1,5 +1,7 @@
 // src/components/WeatherCard/WeatherCard.jsx
 import "./WeatherCard.css";
+import { useContext } from "react";
+import CurrentTemperatureUnitContext from "../../contexts/CurrentTemperatureUnitContext";
 
 function WeatherArt({ type }) {
   switch (type) {
@@ -43,12 +45,18 @@ function WeatherArt({ type }) {
 }
 
 export default function WeatherCard({ weatherData }) {
+  const { currentTemperatureUnit } = useContext(CurrentTemperatureUnitContext);
+
+  const temp =
+    currentTemperatureUnit === "C" ? weatherData?.tempC : weatherData?.temp;
   return (
     <section className={`weather-card`} aria-label="Current weather">
-      <div className={`weather-card__inner  ${weatherData?.type ?? "cloudy"}`}>
+      <div
+        className={`weather-card__inner  ${weatherData?.condition ?? "cloudy"}`}
+      >
         <div className={`weather-card__temp `}>
-          {weatherData?.temp
-            ? Math.round(weatherData?.temp) + "°F"
+          {temp != null
+            ? Math.round(temp) + "°" + currentTemperatureUnit
             : "Loading..."}
         </div>
         <WeatherArt type={weatherData?.type} />
