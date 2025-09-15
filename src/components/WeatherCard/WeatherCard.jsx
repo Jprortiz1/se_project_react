@@ -49,12 +49,13 @@ export default function WeatherCard({ weatherData }) {
 
   const temp =
     currentTemperatureUnit === "C" ? weatherData?.tempC : weatherData?.temp;
+
   return (
-    <section className={`weather-card`} aria-label="Current weather">
+    <section className="weather-card" aria-label="Current weather">
       <div
-        className={`weather-card__inner  ${weatherData?.condition ?? "cloudy"}`}
+        className={`weather-card__inner ${weatherData?.condition ?? "cloudy"}`}
       >
-        <div className={`weather-card__temp `}>
+        <div className="weather-card__temp">
           {temp != null
             ? Math.round(temp) + "°" + currentTemperatureUnit
             : "Loading..."}

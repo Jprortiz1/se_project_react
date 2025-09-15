@@ -1,3 +1,4 @@
+import React from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
 import { useForm } from "../../hooks/useForm";
 
@@ -8,30 +9,44 @@ const AddItemModal = ({ isOpen, onAddItem, onCloseModal }) => {
     weather: "",
   });
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // evita doble submit
 
-    const imageUrl = values.imageUrl || values.link;
-    const weatherLower =
-      typeof values.weather === "string"
-        ? values.weather.toLowerCase()
-        : values.weather;
+    setIsSubmitting(true);
 
-    onAddItem({
-      name: values.name,
-      imageUrl,
-      weather: weatherLower,
-    });
+    try {
+      const imageUrl = values.imageUrl; // no dependas de values.link si no existe
+      const weatherLower =
+        typeof values.weather === "string"
+          ? values.weather.toLowerCase()
+          : values.weather;
 
-    resetForm();
-    onCloseModal();
+      // IMPORTANTE: onAddItem debe devolver una Promesa
+      await onAddItem({
+        name: values.name?.trim(),
+        imageUrl: imageUrl?.trim(),
+        weather: weatherLower,
+      });
+
+      // Solo si fue exitoso:
+      resetForm();
+      onCloseModal();
+    } catch (err) {
+      console.error("Error adding item:", err);
+      // opcional: muestra un mensaje de error en UI
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <ModalWithForm
       name="add-garment"
       title="New garment"
-      buttonText="Add garment"
+      buttonText={isSubmitting ? "Adding..." : "Add garment"}
       isOpen={isOpen}
       onClose={onCloseModal}
       onSubmit={handleSubmit}

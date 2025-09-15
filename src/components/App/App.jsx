@@ -5,9 +5,7 @@ import Header from "../Header/Header";
 import Main from "../Main/Main";
 import Footer from "../Footer/Footer";
 import ItemModal from "../ItemModal/ItemModal";
-// import ModalWithForm from "../ModalWithForm/ModalWithForm";
-// import { defaultClothingItems } from "../../utils/constants";
-import { fetchWeatherByCoords, getWeatherType } from "../../utils/weatherApi"; // ⬅️ importa también getWeatherType
+import { fetchWeatherByCoords, getWeatherType } from "../../utils/weatherApi";
 import avatar from "../../assets/images/avatar.png";
 import CurrentTemperatureUnitContext from "../../contexts/CurrentTemperatureUnitContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -18,35 +16,25 @@ import { getItems, addItem, deleteItem } from "../../utils/api";
 
 export default function App() {
   const [currentTemperatureUnit, setCurrentTemperatureUnit] = useState("F");
-
   const handleToggleSwitchChange = () => {
-    setCurrentTemperatureUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
+    setCurrentTemperatureUnit((prev) => (prev === "C" ? "F" : "C"));
   };
 
-  // ✅ Inicializa como objeto (no null)
+  // Initialize weather as an object (not null) to avoid optional chaining everywhere
   const [weather, setWeather] = useState({
-    temp: null, // null al inicio para mostrar "loading"
+    temp: null,          // Fahrenheit
+    tempC: null,         // Celsius
+    tempF: null,         // Fahrenheit (explicit alias if you need both)
     city: "",
-    type: "", // "hot" | "warm" | "cold"
+    type: "",            // "hot" | "warm" | "cold"
     description: "",
     icon: null,
-    condition: "", // opcional para UI (sunny, cloudy, etc.)
-    dayOrNight: "", // "day" | "night"
-    // Si en algún lado lees weather.main?.temp o weather.weather[0]?.description,
-    // estos campos extra evitan errores de acceso:
+    condition: "",
+    dayOrNight: "",
+    // Legacy compatibility if some UI reads these:
     main: { temp: null },
     weather: [{ description: "" }],
   });
-
-  // ✅ Todos los estados juntos y arriba
-  // const [items, setItems] = useState(() =>
-  //   defaultClothingItems.map((clothingItem) => ({
-  //     id: clothingItem._id,
-  //     name: clothingItem.name,
-  //     imageUrl: clothingItem.link,
-  //     weather: clothingItem.weather.toLowerCase(), // "hot" | "warm" | "cold"
-  //   }))
-  // );
 
   const [items, setItems] = useState([]);
 
@@ -56,41 +44,34 @@ export default function App() {
       .catch((err) => console.error(err));
   }, []);
 
+  // Return the promise so the modal can await it and only close on success
   const handleAddItem = (newItemData) => {
-    addItem(newItemData)
-      .then((newItem) => setItems((prev) => [...prev, newItem]))
-      .catch((err) => console.error(err));
+    return addItem(newItemData)
+      .then((newItem) => setItems((prev) => [newItem, ...prev])) // prepend
+      .catch((err) => {
+        console.error(err);
+        throw err; // rethrow so the caller can handle UI errors
+      });
   };
-
-  // const handleDeleteItem = (id) => {
-  //   deleteItem(id)
-  //     .then(() => setItems((prev) => prev.filter((item) => item.id !== id)))
-  //     .catch((err) => console.error(err));
-  // };
 
   const [activeModal, setActiveModal] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [cardToDelete, setCardToDelete] = useState(null);
-  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
-    useState(false);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
 
-  // Open confirmation modal
   const openConfirmationModal = (item) => {
     handleCloseModal();
     setCardToDelete(item);
     setIsDeleteConfirmationOpen(true);
   };
 
-  // Close confirmation modal
   const closeConfirmationModal = () => {
     setCardToDelete(null);
     setIsDeleteConfirmationOpen(false);
   };
 
-  // Delete card handler
   const handleCardDelete = () => {
     if (!cardToDelete) return;
-
     deleteItem(cardToDelete._id)
       .then(() =>
         setItems((prev) => prev.filter((i) => i._id !== cardToDelete._id))
@@ -109,7 +90,7 @@ export default function App() {
     setSelectedItem(null);
   };
 
-  // cerrar modales con ESC
+  // Close modals with ESC
   useEffect(() => {
     if (!activeModal) return;
     const onEsc = (e) => e.key === "Escape" && handleCloseModal();
@@ -117,22 +98,34 @@ export default function App() {
     return () => document.removeEventListener("keydown", onEsc);
   }, [activeModal]);
 
-  // Cargar clima al montar
+  // Helpers for °F/°C conversions
+  const fToC = (f) => Math.round(((f - 32) * 5) / 9);
+  const cToF = (c) => Math.round((c * 9) / 5 + 32);
+
+  // Load weather on mount (with solid fallbacks)
   useEffect(() => {
+    const setFallbackWeather = (fallbackF, opts = {}) => {
+      const computed = {
+        temp: fallbackF,
+        tempF: fallbackF,
+        tempC: fToC(fallbackF),
+        city: opts.city ?? "Unknown city",
+        type: getWeatherType(fallbackF),
+        description: opts.description ?? "Clear sky",
+        icon: null,
+        condition: opts.condition ?? "sunny",
+        dayOrNight: opts.dayOrNight ?? "day",
+      };
+      setWeather({
+        ...computed,
+        main: { temp: computed.temp },
+        weather: [{ description: computed.description }],
+      });
+    };
+
     if (!navigator.geolocation) {
-      // Fallback si no hay geolocalización
-      const fallbackTemp = 70;
-      setWeather((prev) => ({
-        ...prev,
-        temp: fallbackTemp,
-        city: "Unknown city",
-        type: getWeatherType(fallbackTemp), // ✅ usa la función centralizada
-        description: "N/A",
-        condition: "cloudy",
-        dayOrNight: "day",
-        main: { temp: fallbackTemp },
-        weather: [{ description: "N/A" }],
-      }));
+      // No geolocation available
+      setFallbackWeather(70, { description: "N/A", condition: "cloudy" });
       return;
     }
 
@@ -141,62 +134,47 @@ export default function App() {
         try {
           const { latitude, longitude } = pos.coords;
           const normalized = await fetchWeatherByCoords(latitude, longitude);
-          // normalized YA trae temp, city, type, description, icon, condition, dayOrNight
-          // completamos main/weather por compatibilidad si tu UI los lee
-          setWeather({
+          // Ensure both °F and °C are present even if API returns only one
+          const hasTempF = typeof normalized.temp === "number";
+          const tempF = hasTempF ? normalized.temp : normalized.tempF ?? cToF(normalized.tempC);
+          const tempC = typeof normalized.tempC === "number" ? normalized.tempC : fToC(tempF);
+
+          const merged = {
             ...normalized,
-            main: { temp: normalized.temp },
+            temp: tempF,
+            tempF,
+            tempC,
+            main: { temp: tempF },
             weather: [{ description: normalized.description }],
-          });
+            type: getWeatherType(tempF),
+          };
+
+          setWeather(merged);
         } catch (err) {
           console.error("Weather fetch failed:", err);
-          const fallbackTemp = 70;
-          setWeather((prev) => ({
-            ...prev,
-            temp: fallbackTemp,
-            city: "Unknown city",
-            type: getWeatherType(fallbackTemp),
-            description: "Clear sky",
-            icon: null,
-            condition: "sunny",
-            dayOrNight: "day",
-            main: { temp: fallbackTemp },
-            weather: [{ description: "Clear sky" }],
-          }));
+          setFallbackWeather(70);
         }
       },
       (err) => {
         console.error("Geolocation error:", err);
-        const fallbackTemp = 70;
-        setWeather((prev) => ({
-          ...prev,
-          temp: fallbackTemp,
-          city: "Unknown city",
-          type: getWeatherType(fallbackTemp),
-          description: "Clear sky",
-          icon: null,
-          condition: "sunny",
-          dayOrNight: "day",
-          main: { temp: fallbackTemp },
-          weather: [{ description: "Clear sky" }],
-        }));
+        setFallbackWeather(70);
       }
     );
   }, []);
 
-  // Loading state simple: temp === null (aún no cargado)
+  // Simple loading gate
   if (weather.temp === null) {
     return (
       <main className="main">
-        <h2 className="main__lead">Cargando clima y recomendaciones…</h2>
+        <h2 className="main__lead">Loading weather and recommendations…</h2>
       </main>
     );
   }
 
-  // Filtrar según el tipo calculado (hot | warm | cold)
+  // Filter items by computed weather type ("hot" | "warm" | "cold")
   const filtered = items.filter((i) => i.weather === weather.type);
 
-  // usuario simulado
+  // Mock user
   const user = {
     name: "Terrence Tegegne",
     avatar: avatar,
@@ -219,7 +197,7 @@ export default function App() {
               path="/"
               element={
                 <Main
-                  weatherData={weather} // { temp, city, type, ... }
+                  weatherData={weather}
                   items={filtered}
                   onSelectCard={handleCardClick}
                 />
@@ -241,81 +219,12 @@ export default function App() {
 
           <Footer author="Jorge Proaño" />
 
-          {/* ADD CLOTHES */}
-          {/* <ModalWithForm
-            name="add-garment"
-            title="New garment"
-            buttonText="Add garment"
-            isOpen={activeModal === "add"}
-            onClose={handleCloseModal}
-            onSubmit={(values) => {
-              const imageUrl = values.imageUrl || values.link;
-              const weatherLower =
-                typeof values.weather === "string"
-                  ? values.weather.toLowerCase()
-                  : values.weather;
-
-              setItems((prev) => [
-                {
-                  id: crypto.randomUUID(),
-                  name: values.name,
-                  imageUrl,
-                  weather: weatherLower, // "hot" | "warm" | "cold"
-                },
-                ...prev,
-              ]);
-
-              handleCloseModal();
-            }}
-          >
-            <label className="form__field">
-              <span>Name</span>
-              <input
-                className="form__control"
-                name="name"
-                type="text"
-                placeholder="Name"
-                required
-              />
-            </label>
-
-            <label className="form__field">
-              <span>Image URL</span>
-              <input
-                className="form__control"
-                name="imageUrl"
-                type="url"
-                placeholder="Image URL"
-                required
-              />
-            </label>
-
-            <fieldset className="form__field form__weather">
-              <legend>Select the weather type:</legend>
-              <div className="form__radios">
-                <label className="radio">
-                  <input type="radio" name="weather" value="hot" required />
-                  <span>Hot</span>
-                </label>
-                <label className="radio">
-                  <input type="radio" name="weather" value="warm" />
-                  <span>Warm</span>
-                </label>
-                <label className="radio">
-                  <input type="radio" name="weather" value="cold" />
-                  <span>Cold</span>
-                </label>
-              </div>
-            </fieldset>
-          </ModalWithForm> */}
-
           <AddItemModal
             isOpen={activeModal === "add"}
-            onAddItem={handleAddItem}
+            onAddItem={handleAddItem}           // returns a Promise
             onCloseModal={handleCloseModal}
           />
 
-          {/* PREVIEW ITEM */}
           <ItemModal
             isOpen={activeModal === "preview"}
             item={selectedItem}

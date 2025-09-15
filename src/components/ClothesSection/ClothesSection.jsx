@@ -2,8 +2,6 @@ import ItemCard from "../ItemCard/ItemCard";
 import "./ClothesSection.css";
 
 function ClothesSection({ items, weatherType, onSelectCard }) {
-  //   const filteredItems = items.filter((item) => item.weather === weatherType);
-
   if (items.length === 0) {
     return (
       <p className="items__empty">
@@ -15,7 +13,7 @@ function ClothesSection({ items, weatherType, onSelectCard }) {
   return (
     <ul className="cards">
       {items.map((item) => (
-        <li key={item.id} className="cards__item">
+        <li key={item._id} className="cards__item">
           <ItemCard item={item} onSelect={() => onSelectCard(item)} />
         </li>
       ))}

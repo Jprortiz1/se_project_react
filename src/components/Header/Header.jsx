@@ -1,11 +1,9 @@
 import "./Header.css";
 import logo from "../../assets/images/logo.svg";
 import ToggleSwitch from "../ToggleSwitch/ToggleSwitch";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Header({ weatherData, user, onAddClothes }) {
-  const [value, setValue] = useState(false);
   const currentDate = new Date().toLocaleString("default", {
     month: "long",
     day: "numeric",
@@ -25,7 +23,8 @@ export default function Header({ weatherData, user, onAddClothes }) {
         </div>
 
         <div className="header__right">
-          <ToggleSwitch isOn={value} handleToggle={() => setValue(!value)} />
+          {/* ToggleSwitch already reads context value & handler */}
+          <ToggleSwitch />
           <button type="button" className="header__add" onClick={onAddClothes}>
             + Add clothes
           </button>
