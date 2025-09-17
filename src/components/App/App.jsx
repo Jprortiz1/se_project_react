@@ -5,7 +5,10 @@ import Header from "../Header/Header";
 import Main from "../Main/Main";
 import Footer from "../Footer/Footer";
 import ItemModal from "../ItemModal/ItemModal";
-import { fetchWeatherByCoords, getWeatherType } from "../../utils/weatherApi";
+import {
+  fetchWeatherByCoords,
+  getWeatherType,
+} from "../../utils/weatherApi";
 import avatar from "../../assets/images/avatar.png";
 import CurrentTemperatureUnitContext from "../../contexts/CurrentTemperatureUnitContext";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -14,24 +17,32 @@ import AddItemModal from "../AddItemModal/AddItemModal";
 import DeleteConfirmationModal from "../DeleteConfirmationModal/DeleteConfirmationModal";
 import { getItems, addItem, deleteItem } from "../../utils/api";
 
+// --- helpers locales ---
+const fToC = (f) => Math.round(((f - 32) * 5) / 9);
+const cToF = (c) => Math.round((c * 9) / 5 + 32);
+const norm = (s) => (s || "").toLowerCase().trim();
+
+// Detecta si hay key cargada por Vite (evitamos llamar a la API si falta)
+const HAS_OW_KEY = Boolean(import.meta.env.VITE_OPENWEATHER_KEY);
+
 export default function App() {
   const [currentTemperatureUnit, setCurrentTemperatureUnit] = useState("F");
   const handleToggleSwitchChange = () => {
     setCurrentTemperatureUnit((prev) => (prev === "C" ? "F" : "C"));
   };
 
-  // Initialize weather as an object (not null) to avoid optional chaining everywhere
+  // Estado de clima inicial para evitar optional chaining por todos lados
   const [weather, setWeather] = useState({
-    temp: null,          // Fahrenheit
-    tempC: null,         // Celsius
-    tempF: null,         // Fahrenheit (explicit alias if you need both)
+    temp: null, // Fahrenheit
+    tempC: null,
+    tempF: null,
     city: "",
-    type: "",            // "hot" | "warm" | "cold"
+    type: "", // "hot" | "warm" | "cold"
     description: "",
     icon: null,
     condition: "",
     dayOrNight: "",
-    // Legacy compatibility if some UI reads these:
+    // compatibilidad con UI antigua
     main: { temp: null },
     weather: [{ description: "" }],
   });
@@ -40,17 +51,22 @@ export default function App() {
 
   useEffect(() => {
     getItems()
-      .then((data) => setItems(data))
+      .then((data) => setItems(data || []))
       .catch((err) => console.error(err));
   }, []);
 
-  // Return the promise so the modal can await it and only close on success
+  // add → prepend y deja que el modal cierre cuando el .then se resuelva
   const handleAddItem = (newItemData) => {
-    return addItem(newItemData)
-      .then((newItem) => setItems((prev) => [newItem, ...prev])) // prepend
+    // normaliza weather por si acaso
+    const payload = {
+      ...newItemData,
+      weather: norm(newItemData.weather), // "hot"|"warm"|"cold"
+    };
+    return addItem(payload)
+      .then((newItem) => setItems((prev) => [newItem, ...prev]))
       .catch((err) => {
         console.error(err);
-        throw err; // rethrow so the caller can handle UI errors
+        throw err;
       });
   };
 
@@ -90,7 +106,7 @@ export default function App() {
     setSelectedItem(null);
   };
 
-  // Close modals with ESC
+  // Cerrar modales con ESC
   useEffect(() => {
     if (!activeModal) return;
     const onEsc = (e) => e.key === "Escape" && handleCloseModal();
@@ -98,35 +114,43 @@ export default function App() {
     return () => document.removeEventListener("keydown", onEsc);
   }, [activeModal]);
 
-  // Helpers for °F/°C conversions
-  const fToC = (f) => Math.round(((f - 32) * 5) / 9);
-  const cToF = (c) => Math.round((c * 9) / 5 + 32);
-
-  // Load weather on mount (with solid fallbacks)
+  // Carga del clima (con fallback sólido y sin errores rojos si no hay key)
   useEffect(() => {
-    const setFallbackWeather = (fallbackF, opts = {}) => {
+    let cancelled = false;
+
+    const setFallbackWeather = (fallbackF = 67, opts = {}) => {
+      const tempF = fallbackF;
+      const tempC = fToC(tempF);
       const computed = {
-        temp: fallbackF,
-        tempF: fallbackF,
-        tempC: fToC(fallbackF),
-        city: opts.city ?? "Unknown city",
-        type: getWeatherType(fallbackF),
-        description: opts.description ?? "Clear sky",
+        temp: tempF,
+        tempF,
+        tempC,
+        city: opts.city ?? "North Beach",
+        type: getWeatherType(tempF), // "hot"|"warm"|"cold"
+        description: opts.description ?? "clear sky",
         icon: null,
-        condition: opts.condition ?? "sunny",
+        condition: opts.condition ?? "cloudy", // para el arte
         dayOrNight: opts.dayOrNight ?? "day",
       };
-      setWeather({
-        ...computed,
-        main: { temp: computed.temp },
-        weather: [{ description: computed.description }],
-      });
+      if (!cancelled) {
+        setWeather({
+          ...computed,
+          main: { temp: tempF },
+          weather: [{ description: computed.description }],
+        });
+      }
     };
 
+    // Si no hay key → evitamos llamar a la API y usamos fallback silencioso
+    if (!HAS_OW_KEY) {
+      console.warn("OpenWeather key missing. Using fallback weather.");
+      setFallbackWeather(67, { city: "North Beach", condition: "cloudy" });
+      return () => { cancelled = true; };
+    }
+
     if (!navigator.geolocation) {
-      // No geolocation available
-      setFallbackWeather(70, { description: "N/A", condition: "cloudy" });
-      return;
+      setFallbackWeather(67, { city: "Unknown city", condition: "cloudy" });
+      return () => { cancelled = true; };
     }
 
     navigator.geolocation.getCurrentPosition(
@@ -134,10 +158,14 @@ export default function App() {
         try {
           const { latitude, longitude } = pos.coords;
           const normalized = await fetchWeatherByCoords(latitude, longitude);
-          // Ensure both °F and °C are present even if API returns only one
-          const hasTempF = typeof normalized.temp === "number";
-          const tempF = hasTempF ? normalized.temp : normalized.tempF ?? cToF(normalized.tempC);
-          const tempC = typeof normalized.tempC === "number" ? normalized.tempC : fToC(tempF);
+
+          const hasTempF = typeof normalized?.temp === "number";
+          const tempF = hasTempF
+            ? normalized.temp
+            : normalized.tempF ?? cToF(normalized.tempC);
+          const tempC = typeof normalized?.tempC === "number"
+            ? normalized.tempC
+            : fToC(tempF);
 
           const merged = {
             ...normalized,
@@ -145,24 +173,26 @@ export default function App() {
             tempF,
             tempC,
             main: { temp: tempF },
-            weather: [{ description: normalized.description }],
+            weather: [{ description: normalized?.description || "clear sky" }],
             type: getWeatherType(tempF),
           };
 
-          setWeather(merged);
+          if (!cancelled) setWeather(merged);
         } catch (err) {
-          console.error("Weather fetch failed:", err);
-          setFallbackWeather(70);
+          console.warn("Weather fetch failed:", err?.message || err);
+          setFallbackWeather(67, { city: "North Beach", condition: "cloudy" });
         }
       },
       (err) => {
-        console.error("Geolocation error:", err);
-        setFallbackWeather(70);
+        console.warn("Geolocation error:", err?.message || err);
+        setFallbackWeather(67, { city: "North Beach", condition: "cloudy" });
       }
     );
+
+    return () => { cancelled = true; };
   }, []);
 
-  // Simple loading gate
+  // Gate de carga simple (cuando aún no tenemos temp)
   if (weather.temp === null) {
     return (
       <main className="main">
@@ -170,9 +200,21 @@ export default function App() {
       </main>
     );
   }
+  console.log(
+  "items weather counts =",
+  (items || []).reduce((acc, it) => {
+    const w = (it.weather || "").toLowerCase().trim();
+    acc[w] = (acc[w] || 0) + 1;
+    return acc;
+  }, {})
+);
+console.log("weather.type =", weather.type);
 
-  // Filter items by computed weather type ("hot" | "warm" | "cold")
-  const filtered = items.filter((i) => i.weather === weather.type);
+
+  // Filtra prendas por clima (normalizado para evitar " Warm", "WARM", etc.)
+  const filtered = items.filter(
+    (i) => norm(i.weather) === norm(weather.type)
+  );
 
   // Mock user
   const user = {
@@ -204,24 +246,25 @@ export default function App() {
               }
             />
             <Route
-              path="/profile"
-              element={
-                <Profile
-                  user={user}
-                  items={filtered}
-                  weatherData={weather}
-                  onSelectCard={handleCardClick}
-                  onAddClothes={handleOpenAdd}
-                />
-              }
-            />
+  path="/profile"
+  element={
+    <Profile
+      user={user}
+      items={items}                // ✅ todos los ítems
+      weatherData={weather}
+      onSelectCard={handleCardClick}
+      onAddClothes={handleOpenAdd}
+    />
+  }
+/>
+
           </Routes>
 
           <Footer author="Jorge Proaño" />
 
           <AddItemModal
             isOpen={activeModal === "add"}
-            onAddItem={handleAddItem}           // returns a Promise
+            onAddItem={handleAddItem}   // devuelve Promise → el modal puede cerrar en .then
             onCloseModal={handleCloseModal}
           />
 

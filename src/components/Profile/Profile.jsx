@@ -1,8 +1,9 @@
+// src/components/Profile/Profile.jsx
 import ClothesSection from "../ClothesSection/ClothesSection";
 import "./Profile.css";
 import Sidebar from "../Sidebar/Sidebar";
 
-function Profile({ user, items, weatherData, onSelectCard, onAddClothes }) {
+function Profile({ user, items, onSelectCard, onAddClothes }) {
   return (
     <div className="profile">
       <div className="profile__inner">
@@ -12,8 +13,6 @@ function Profile({ user, items, weatherData, onSelectCard, onAddClothes }) {
             <img className="header__avatar" src={user.avatar} alt={user.name} />
             <p className="header__name">{user.name}</p>
           </div>
-
-          {/* 👉 Sidebar añadido */}
           <Sidebar />
         </div>
 
@@ -21,15 +20,15 @@ function Profile({ user, items, weatherData, onSelectCard, onAddClothes }) {
         <div className="profile__right">
           <div className="profile__right-actions">
             <p className="title">Your Items</p>
-            <button onClick={onAddClothes} className="add">
-              + Add new
-            </button>
+            <button onClick={onAddClothes} className="add">+ Add new</button>
           </div>
 
+          {/* 👇 Aquí NO pasamos weatherType para que no filtre */}
           <ClothesSection
             items={items}
-            weatherType={weatherData?.type}
             onSelectCard={onSelectCard}
+            /* sin weatherType */
+            /* si tu ClothesSection exige la prop, pásale undefined: weatherType={undefined} */
           />
         </div>
       </div>

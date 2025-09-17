@@ -1,8 +1,7 @@
-// src/components/WeatherCard/WeatherCard.jsx
 import "./WeatherCard.css";
 import { useContext } from "react";
 import CurrentTemperatureUnitContext from "../../contexts/CurrentTemperatureUnitContext";
-
+ 
 function WeatherArt({ type }) {
   switch (type) {
     case "cloudy":
@@ -43,13 +42,13 @@ function WeatherArt({ type }) {
       );
   }
 }
-
+ 
 export default function WeatherCard({ weatherData }) {
   const { currentTemperatureUnit } = useContext(CurrentTemperatureUnitContext);
-
+ 
   const temp =
     currentTemperatureUnit === "C" ? weatherData?.tempC : weatherData?.temp;
-
+ 
   return (
     <section className="weather-card" aria-label="Current weather">
       <div
@@ -65,3 +64,4 @@ export default function WeatherCard({ weatherData }) {
     </section>
   );
 }
+ 
