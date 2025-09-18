@@ -1,26 +1,40 @@
-/* Tamaño fijo como en el mock */
+/* CONTENEDOR: tamaño fijo por tarjeta, sin estirarse */
+.cards__list {
+  --card-w: 280px;   /* ancho fijo por tarjeta */
+  --card-h: 328px;   /* alto fijo por tarjeta */
+
+  display: grid;
+  /* columnas de tamaño fijo; si la pantalla es más angosta que 280px, se encoge a 100% */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-w)), var(--card-w)));
+  grid-auto-rows: var(--card-h);
+
+  gap: 16px;
+  align-items: start;      /* evita estiramiento vertical */
+  justify-content: center; /* centra cuando hay 1–2 tarjetas */
+}
+
 .item {
   box-sizing: border-box;
-
+ 
   position: relative;
   border: 1px solid #cfcfcf;
   border-radius: 20px;
-
+ 
   display: flex;
   overflow: hidden;
   align-items: center;
   justify-content: center;
-
+ 
   height: 100%;
-
+ 
   cursor: pointer;
   transition: box-shadow 0.15s ease, transform 0.08s ease;
 }
-
+ 
 .item:hover {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
-
+ 
 /* “pill” con el nombre centrado arriba */
 .item__badge {
   position: absolute;
@@ -29,13 +43,13 @@
   transform: translateX(-50%);
   padding: 4px 10px;
   background: white;
-
+ 
   font-weight: 700;
   font-size: 16px;
   border: 1px solid #d7d7d7;
   border-radius: 8px;
 }
-
+ 
 /* Imagen grande centrada, sin deformarse */
 .item__image {
   width: 100%;
