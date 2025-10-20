@@ -1,4 +1,5 @@
 // src/components/LoginModal.jsx
+import "./LoginModal.css";
 import { useState } from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
 
