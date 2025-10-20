@@ -3,7 +3,18 @@ import logo from "../../assets/images/logo.svg";
 import ToggleSwitch from "../ToggleSwitch/ToggleSwitch";
 import { Link } from "react-router-dom";
 
-export default function Header({ weatherData, user, onAddClothes }) {
+import { useContext } from "react";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
+
+export default function Header({
+  weatherData,
+  onAddClothes,
+  onSignUp,
+  onLogin,
+  isLoggedIn,
+}) {
+  const user = useContext(CurrentUserContext);
+
   const currentDate = new Date().toLocaleString("default", {
     month: "long",
     day: "numeric",
@@ -25,13 +36,35 @@ export default function Header({ weatherData, user, onAddClothes }) {
         <div className="header__right">
           {/* ToggleSwitch already reads context value & handler */}
           <ToggleSwitch />
-          <button type="button" className="header__add" onClick={onAddClothes}>
-            + Add clothes
-          </button>
-          <Link to="/profile" className="header__profile">
-            <p className="header__name">{user.name}</p>
-            <img className="header__avatar" src={user.avatar} alt={user.name} />
-          </Link>
+
+          {isLoggedIn ? (
+            <>
+              <button
+                type="button"
+                className="header__add"
+                onClick={onAddClothes}
+              >
+                + Add clothes
+              </button>
+              <Link to="/profile" className="header__profile">
+                <p className="header__name">{user?.name}</p>
+                <img
+                  className="header__avatar"
+                  src={user?.avatar}
+                  alt={user?.name}
+                />
+              </Link>
+            </>
+          ) : (
+            <>
+              <button type="button" className="header__add" onClick={onSignUp}>
+                Sign Up
+              </button>
+              <button type="button" className="header__add" onClick={onLogin}>
+                Log In
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

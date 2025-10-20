@@ -1,12 +1,17 @@
 import "./ItemModal.css";
 import closeIcon from "../../assets/icons/close-icon.svg";
+import { useContext } from "react";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 
 export default function ItemModal({ isOpen, item, onClose, onDelete }) {
+  const currentUser = useContext(CurrentUserContext);
   if (!isOpen || !item) return null;
 
   const handleBackdrop = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
+
+  const isOwn = item.owner === currentUser._id;
 
   return (
     <div
@@ -30,13 +35,15 @@ export default function ItemModal({ isOpen, item, onClose, onDelete }) {
         <div className="modal-item__info">
           <div className="modal-item__titles">
             <h3 className="modal-item__title">{item.name}</h3>
-            <button
-              type="button"
-              className="modal-item__delete"
-              onClick={() => onDelete(item)}
-            >
-              Delete Item
-            </button>
+            {isOwn && (
+              <button
+                type="button"
+                className="modal-item__delete"
+                onClick={() => onDelete(item)}
+              >
+                Delete Item
+              </button>
+            )}
           </div>
           <p className="modal-item__meta">
             Weather: {String(item.weather).toLowerCase()}

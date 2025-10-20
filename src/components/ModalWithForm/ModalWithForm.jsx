@@ -6,9 +6,11 @@ export default function ModalWithForm({
   title,
   name,
   buttonText = "Save",
+  secondaryButtonText = null,
   isOpen,
   onClose,
   onSubmit,
+  onSecondary = null,
   children,
 }) {
   const formRef = useRef(null);
@@ -38,9 +40,20 @@ export default function ModalWithForm({
 
         <form ref={formRef} name={name} className="mform" onSubmit={onSubmit}>
           {children}
-          <button type="submit" className="btn">
-            {buttonText}
-          </button>
+          <div className="form__buttons">
+            <button type="submit" className="btn">
+              {buttonText}
+            </button>
+            {secondaryButtonText != null && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={onSecondary}
+              >
+                {secondaryButtonText}
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>

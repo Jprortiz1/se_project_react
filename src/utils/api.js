@@ -36,3 +36,52 @@ export async function deleteItem(id) {
   await checkResponse(res);
   return true;
 }
+
+export async function updateUserProfile(token, { name, avatar }) {
+  return fetch(`${baseUrl}/users/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ name, avatar }),
+  }).then(async (res) => {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const message = data.message || res.statusText || "Update failed";
+      throw new Error(message);
+    }
+    return data;
+  });
+}
+
+async function handleResponse(res) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const message = data.message || res.statusText || "Unknown error";
+    throw new Error(message);
+  }
+  return data;
+}
+
+// Add a like to a card
+export function addCardLike(cardId, token) {
+  return fetch(`${baseUrl}/items/${cardId}/likes`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(handleResponse);
+}
+
+// Remove a like from a card
+export function removeCardLike(cardId, token) {
+  return fetch(`${baseUrl}/items/${cardId}/likes`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(handleResponse);
+}

@@ -2,9 +2,16 @@ import { useContext } from "react";
 import WeatherCard from "../WeatherCard/WeatherCard";
 import "./Main.css";
 import CurrentTemperatureUnitContext from "../../contexts/CurrentTemperatureUnitContext";
-import ClothesSection from "../ClothesSection/ClothesSection";
+import PublicClothesSection from "../PublicClothesSection/PublicClothesSection";
+// import ClothesSection from "../ClothesSection/ClothesSection";
 
-export default function Main({ weatherData, items, onSelectCard }) {
+export default function Main({
+  weatherData,
+  items,
+  onSelectCard,
+  onCardLike,
+  isLoggedIn,
+}) {
   const { currentTemperatureUnit } = useContext(CurrentTemperatureUnitContext);
 
   const temp =
@@ -26,14 +33,22 @@ export default function Main({ weatherData, items, onSelectCard }) {
       <WeatherCard weatherData={weatherData} />
       <div className="container">
         <h2 className="main__lead">
-          Today is {Math.round(temp)}°{currentTemperatureUnit} / You may want to wear:
+          Today is {Math.round(temp)}°{currentTemperatureUnit} / You may want to
+          wear:
         </h2>
 
-        <ClothesSection
+        <PublicClothesSection
           items={items}
           weatherType={weatherData?.type}
           onSelectCard={onSelectCard}
+          onCardLike={onCardLike}
+          isLoggedIn={isLoggedIn}
         />
+        {/* <ClothesSection
+          items={items}
+          weatherType={weatherData?.type}
+          onSelectCard={onSelectCard}
+        /> */}
       </div>
     </main>
   );

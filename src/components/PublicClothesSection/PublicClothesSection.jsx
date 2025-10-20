@@ -1,20 +1,14 @@
 import ItemCard from "../ItemCard/ItemCard";
-import "./ClothesSection.css";
-import { useContext } from "react";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
+import "./PublicClothesSection.css";
 
-function ClothesSection({
+function PublicClothesSection({
   items,
   weatherType,
   onSelectCard,
-  isLoggedIn,
   onCardLike,
+  isLoggedIn,
 }) {
-  const currentUser = useContext(CurrentUserContext);
-
-  const userItems = items.filter((card) => card.owner === currentUser?._id);
-
-  if (userItems.length === 0) {
+  if (items.length === 0) {
     return (
       <p className="items__empty">
         No hay prendas para el clima <strong>{weatherType}</strong>.
@@ -24,13 +18,13 @@ function ClothesSection({
 
   return (
     <ul className="cards">
-      {userItems.map((item) => (
+      {items.map((item) => (
         <li key={item._id} className="cards__item">
           <ItemCard
             item={item}
             onSelect={() => onSelectCard(item)}
-            onCardLike={onCardLike}
             isLoggedIn={isLoggedIn}
+            onCardLike={onCardLike}
           />
         </li>
       ))}
@@ -38,4 +32,4 @@ function ClothesSection({
   );
 }
 
-export default ClothesSection;
+export default PublicClothesSection;
