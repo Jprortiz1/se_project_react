@@ -1,7 +1,7 @@
 // src/components/Profile/Profile.jsx
 import ClothesSection from "../ClothesSection/ClothesSection";
 import "./Profile.css";
-// import Sidebar from "../Sidebar/Sidebar";
+import Sidebar from "../Sidebar/Sidebar";
 
 function Profile({
   user,
@@ -18,17 +18,13 @@ function Profile({
       <div className="profile__inner">
         {/* Columna izquierda */}
         <div className="profile__left">
-          <div className="profile__header-card">
-            <img className="header__avatar" src={user.avatar} alt={user.name} />
-            <p className="header__name">{user.name}</p>
-          </div>
-          {/* <Sidebar /> */}
-          <p onClick={onEditProfile} className="profile__edit">
-            Change profile data
-          </p>
-          <p onClick={onLogout} className="profile__logout">
-            Log out
-          </p>
+          <Sidebar
+            name={user?.name}
+            email={user?.email}
+            avatar={user?.avatar}
+            onEditProfile={onEditProfile}
+            onLogout={onLogout}
+          />
         </div>
 
         {/* Columna derecha */}
@@ -40,14 +36,11 @@ function Profile({
             </button>
           </div>
 
-          {/* 👇 Aquí NO pasamos weatherType para que no filtre */}
           <ClothesSection
             items={items}
             onSelectCard={onSelectCard}
             onCardLike={onCardLike}
             isLoggedIn={isLoggedIn}
-            /* sin weatherType */
-            /* si tu ClothesSection exige la prop, pásale undefined: weatherType={undefined} */
           />
         </div>
       </div>

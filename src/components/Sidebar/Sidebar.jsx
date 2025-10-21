@@ -1,16 +1,21 @@
+// src/components/Sidebar/Sidebar.jsx
 import "./Sidebar.css";
 
-function Sidebar() {
+export default function Sidebar({ name, email, avatar, onEditProfile, onLogout }) {
   return (
     <aside className="sidebar">
-      <h2 className="sidebar__title">Menu</h2>
-      <ul className="sidebar__list">
-        <li className="sidebar__item">Overview</li>
-        <li className="sidebar__item">My Items</li>
-        <li className="sidebar__item">Settings</li>
-      </ul>
+      <div className="sidebar__user">
+        {avatar && <img className="sidebar__avatar" src={avatar} alt={name} />}
+        <p className="sidebar__name">{name}</p>
+        {email && <p className="sidebar__email">{email}</p>}
+      </div>
+
+      <button type="button" className="sidebar__btn" onClick={onEditProfile}>
+        Edit profile
+      </button>
+      <button type="button" className="sidebar__btn" onClick={onLogout}>
+        Log out
+      </button>
     </aside>
   );
 }
-
-export default Sidebar;
