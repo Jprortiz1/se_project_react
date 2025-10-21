@@ -1,22 +1,15 @@
-// src/components/LoginModal.jsx
+// src/components/LoginModal/LoginModal.jsx
 import "./LoginModal.css";
 import { useState } from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
 
-function LoginModal({
-  isOpen,
-  onClose,
-  onLogin,
-  error,
-  setError,
-  onSecondary,
-}) {
+function LoginModal({ isOpen, onClose, onLogin, error, setError, onSecondary }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setError(null);
+    setError?.(null);
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -33,17 +26,19 @@ function LoginModal({
     <ModalWithForm
       name="login"
       title="Log in"
-      buttonText={isSubmitting ? "Loggin in..." : "Log in"}
-      secondaryButtonText={"or Register"}
+      buttonText={isSubmitting ? "Logging in..." : "Log in"}
+      secondaryButtonText="or Register"
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}
       onSecondary={onSecondary}
     >
       <label
-        className={`form__field space ${error == "EMAIL_NOT_FOUND" && "error"}`}
+        className={`form__field space ${
+          error === "EMAIL_NOT_FOUND" ? "error" : ""
+        }`}
       >
-        <span>{error == "EMAIL_NOT_FOUND" ? "User not found" : "Email"}</span>
+        <span>{error === "EMAIL_NOT_FOUND" ? "User not found" : "Email"}</span>
         <input
           className="form__control"
           type="email"
@@ -55,9 +50,11 @@ function LoginModal({
         />
       </label>
 
-      <label className={`form__field ${error == "WRONG_PASSWORD" && "error"}`}>
+      <label
+        className={`form__field ${error === "WRONG_PASSWORD" ? "error" : ""}`}
+      >
         <span>
-          {error == "WRONG_PASSWORD" ? "Incorrect Password" : "Password"}
+          {error === "WRONG_PASSWORD" ? "Incorrect Password" : "Password"}
         </span>
         <input
           className="form__control"
@@ -70,31 +67,6 @@ function LoginModal({
         />
       </label>
     </ModalWithForm>
-    // <div className="modal">
-    //   <form onSubmit={handleSubmit}>
-    //     <h2>Login</h2>
-    //     <input
-    //       type="email"
-    //       name="email"
-    //       placeholder="Email"
-    //       value={form.email}
-    //       onChange={handleChange}
-    //       required
-    //     />
-    //     <input
-    //       type="password"
-    //       name="password"
-    //       placeholder="Password"
-    //       value={form.password}
-    //       onChange={handleChange}
-    //       required
-    //     />
-    //     <button type="submit">Login</button>
-    //     <button type="button" onClick={onClose}>
-    //       Cancel
-    //     </button>
-    //   </form>
-    // </div>
   );
 }
 

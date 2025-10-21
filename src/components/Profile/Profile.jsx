@@ -4,7 +4,7 @@ import "./Profile.css";
 import Sidebar from "../Sidebar/Sidebar";
 
 function Profile({
-  user,
+  // ❌ user,            // ya no se usa aquí (Sidebar toma del contexto)
   items,
   onSelectCard,
   onAddClothes,
@@ -19,9 +19,6 @@ function Profile({
         {/* Columna izquierda */}
         <div className="profile__left">
           <Sidebar
-            name={user?.name}
-            email={user?.email}
-            avatar={user?.avatar}
             onEditProfile={onEditProfile}
             onLogout={onLogout}
           />

@@ -1,7 +1,15 @@
 // src/components/Sidebar/Sidebar.jsx
 import "./Sidebar.css";
+import { useContext } from "react";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 
-export default function Sidebar({ name, email, avatar, onEditProfile, onLogout }) {
+export default function Sidebar({ onEditProfile, onLogout }) {
+  const currentUser = useContext(CurrentUserContext);
+
+  const name = currentUser?.name || "User";
+  const email = currentUser?.email || "";
+  const avatar = currentUser?.avatar || "";
+
   return (
     <aside className="sidebar">
       <div className="sidebar__user">

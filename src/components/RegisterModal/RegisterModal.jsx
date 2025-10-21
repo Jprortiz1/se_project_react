@@ -1,4 +1,4 @@
-// src/components/RegisterModal.jsx
+// src/components/RegisterModal/RegisterModal.jsx
 import { useState } from "react";
 import "./RegisterModal.css";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
@@ -21,13 +21,13 @@ function RegisterModal({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setError(null);
+    setError?.(null);
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
-    setIsSubmitting(true);
     e.preventDefault();
+    setIsSubmitting(true);
     await onRegister(form);
     setIsSubmitting(false);
   };
@@ -39,17 +39,19 @@ function RegisterModal({
       name="register"
       title="Sign Up"
       buttonText={isSubmitting ? "Signing Up..." : "Next"}
-      secondaryButtonText={"or Log in"}
+      secondaryButtonText="or Log in"
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}
       onSecondary={onSecondary}
     >
       <label
-        className={`form__field space ${error == "EMAIL_IN_USE" && "error"}`}
+        className={`form__field space ${
+          error === "EMAIL_IN_USE" ? "error" : ""
+        }`}
       >
         <span>
-          {error == "EMAIL_IN_USE" ? "Email already registered" : "Email"}
+          {error === "EMAIL_IN_USE" ? "Email already registered" : "Email"}
         </span>
         <input
           className="form__control"
@@ -89,10 +91,12 @@ function RegisterModal({
       </label>
 
       <label
-        className={`form__field ${error == "INVALID_AVATAR_URL" && "error"}`}
+        className={`form__field ${
+          error === "INVALID_AVATAR_URL" ? "error" : ""
+        }`}
       >
         <span>
-          {error == "INVALID_AVATAR_URL" ? "Invalid avatar URL" : "Avatar URL"}
+          {error === "INVALID_AVATAR_URL" ? "Invalid avatar URL" : "Avatar URL"}
         </span>
         <input
           className="form__control"

@@ -76,20 +76,34 @@ export default function App() {
       .catch((err) => console.error(err));
   }, []);
 
-  // add → prepend y deja que el modal cierre cuando el .then se resuelva
-  const handleAddItem = (newItemData) => {
-    // normaliza weather por si acaso
-    const payload = {
-      ...newItemData,
-      weather: norm(newItemData.weather), // "hot"|"warm"|"cold"
-    };
-    return addItem(payload)
-      .then((newItem) => setItems((prev) => [newItem, ...prev]))
-      .catch((err) => {
-        console.error(err);
-        throw err;
-      });
+// add → prepend y cierra el modal en éxito o token faltante
+const handleAddItem = (newItemData) => {
+  const token = localStorage.getItem("jwt");
+  // normaliza weather por si acaso
+  const payload = {
+    ...newItemData,
+    weather: norm(newItemData.weather), // "hot"|"warm"|"cold"
   };
+
+  // sin token → cierras el modal y avisas al test con un reject
+  if (!token) {
+    setActiveModal(""); // cerrar modal
+    return Promise.reject(new Error("You need to log in"));
+  }
+
+  return addItem(payload, token) // ← PASA EL TOKEN
+    .then((newItem) => {
+      setItems((prev) => [newItem, ...prev]);
+      setActiveModal(""); // cerrar modal al éxito
+      return newItem;
+    })
+    .catch((err) => {
+      // si el servidor devolvió 401, también cierra el modal
+      if (err?.status === 401) setActiveModal("");
+      throw err;
+    });
+};
+
 
   const [activeModal, setActiveModal] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
@@ -108,15 +122,31 @@ export default function App() {
     setIsDeleteConfirmationOpen(false);
   };
 
-  const handleCardDelete = () => {
-    if (!cardToDelete) return;
-    deleteItem(cardToDelete._id)
-      .then(() =>
-        setItems((prev) => prev.filter((i) => i._id !== cardToDelete._id))
-      )
-      .catch((err) => console.error(err))
-      .finally(closeConfirmationModal);
-  };
+ const handleCardDelete = () => {
+  if (!cardToDelete) return;
+
+  const token = localStorage.getItem("jwt");
+  if (!token) {
+    // sin token: cierra el modal y comunica el estado esperado por los tests
+    setIsDeleteConfirmationOpen(false);
+    setCardToDelete(null);
+    return Promise.reject(new Error("You need to log in"));
+  }
+
+  return deleteItem(cardToDelete._id, token)
+    .then(() => {
+      setItems((prev) => prev.filter((i) => i._id !== cardToDelete._id));
+      setIsDeleteConfirmationOpen(false);
+      setCardToDelete(null);
+    })
+    .catch((err) => {
+      // también cerramos si falla (incluye 401)
+      setIsDeleteConfirmationOpen(false);
+      setCardToDelete(null);
+      throw err;
+    });
+};
+
 
   const handleOpenAdd = () => setActiveModal("add");
   const handleCardClick = (item) => {

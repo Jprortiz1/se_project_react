@@ -11,7 +11,14 @@ export default function ItemModal({ isOpen, item, onClose, onDelete }) {
     if (e.target === e.currentTarget) onClose();
   };
 
-  const isOwn = item.owner === currentUser._id;
+  // owner puede ser string o { _id: "..." }
+  const ownerId =
+    typeof item.owner === "string" ? item.owner : item.owner?._id;
+
+  // ✅ evita crash si currentUser es null / undefined
+  const isOwn = ownerId === currentUser?._id;
+
+  const src = item.imageUrl ?? item.link;
 
   return (
     <div
@@ -29,13 +36,24 @@ export default function ItemModal({ isOpen, item, onClose, onDelete }) {
         >
           <img src={closeIcon} alt="Close" />
         </button>
+
         <div className="modal-item__media">
-          <img src={item.imageUrl || item.link} alt={item.name} />
+          <img
+            src={src}
+            alt={item.name}
+            onError={(e) => {
+              e.currentTarget.src = "https://placehold.co/600x400?text=Image";
+              e.currentTarget.onerror = null;
+            }}
+          />
         </div>
+
         <div className="modal-item__info">
           <div className="modal-item__titles">
             <h3 className="modal-item__title">{item.name}</h3>
-            {isOwn && (
+
+            {/* ✅ muestra Delete sólo si el item es del usuario y existe onDelete */}
+            {isOwn && onDelete && (
               <button
                 type="button"
                 className="modal-item__delete"
@@ -45,8 +63,9 @@ export default function ItemModal({ isOpen, item, onClose, onDelete }) {
               </button>
             )}
           </div>
+
           <p className="modal-item__meta">
-            Weather: {String(item.weather).toLowerCase()}
+            Weather: {(item.weather ?? "").toString().toLowerCase()}
           </p>
         </div>
       </div>
