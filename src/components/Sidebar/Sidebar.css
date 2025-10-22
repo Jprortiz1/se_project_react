@@ -25,3 +25,25 @@
 .sidebar__item:hover {
   text-decoration: underline;
 }
+/* Layout del bloque de usuario */
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Tamaño y recorte del avatar */
+.sidebar__avatar {
+  width: 48px;      
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover; 
+  display: block;
+  flex: 0 0 auto;
+}
+
+
+.sidebar img {
+  max-width: 100%;
+  height: auto;
+}

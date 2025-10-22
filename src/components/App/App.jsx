@@ -87,19 +87,19 @@ const handleAddItem = (newItemData) => {
 
   // sin token → cierras el modal y avisas al test con un reject
   if (!token) {
-    setActiveModal(""); // cerrar modal
+   handleCloseModal(); // cerrar modal
     return Promise.reject(new Error("You need to log in"));
   }
 
   return addItem(payload, token) // ← PASA EL TOKEN
     .then((newItem) => {
       setItems((prev) => [newItem, ...prev]);
-      setActiveModal(""); // cerrar modal al éxito
+      handleCloseModal(); // cerrar modal al éxito
       return newItem;
     })
     .catch((err) => {
       // si el servidor devolvió 401, también cierra el modal
-      if (err?.status === 401) setActiveModal("");
+      if (err?.status === 401) handleCloseModal();
       throw err;
     });
 };
@@ -327,6 +327,7 @@ const handleAddItem = (newItemData) => {
     await updateUserProfile(token, { name, avatar })
       .then((res) => {
         setUser(res);
+        handleCloseModal(); // cerrar modal de edición al éxito
       })
       .catch((err) => {
         setEditProfileError(err.message);
