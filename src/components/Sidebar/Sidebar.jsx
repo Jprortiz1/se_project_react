@@ -1,4 +1,3 @@
-// src/components/Sidebar/Sidebar.jsx
 import "./Sidebar.css";
 import { useContext } from "react";
 import CurrentUserContext from "../../contexts/CurrentUserContext";
@@ -13,9 +12,13 @@ export default function Sidebar({ onEditProfile, onLogout }) {
   return (
     <aside className="sidebar">
       <div className="sidebar__user">
-        {avatar && <img className="sidebar__avatar" src={avatar} alt={name} />}
-        <p className="sidebar__name">{name}</p>
-        {email && <p className="sidebar__email">{email}</p>}
+        {/* sin className, para que apliquen los estilos de .sidebar img */}
+        {avatar && <img src={avatar} alt={name} />}
+
+        <div className="sidebar__user-info">
+          <p className="sidebar__name">{name}</p>
+          {email && <p className="sidebar__email">{email}</p>}
+        </div>
       </div>
 
       <button type="button" className="sidebar__btn" onClick={onEditProfile}>

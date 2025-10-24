@@ -20,3 +20,6 @@ git clone https://github.com/Jprortiz1/se_project_express.git
 cd se_project_express
 npm ci
 npm start   # or npm run dev
+
+## 🎥 Project Demo
+https://drive.google.com/file/d/1ULPi-C1CjuNrJcBCafkvgrzDMc1Yfkyl/view?usp=sharing
