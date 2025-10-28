@@ -1,23 +1,31 @@
 // src/components/LoginModal/LoginModal.jsx
 import "./LoginModal.css";
-import { useState } from "react";
+import { useEffect } from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
+import { useForm } from "../../hooks/useForm";
 
 function LoginModal({ isOpen, onClose, onLogin, error, setError, onSecondary }) {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { values, errors, isValid, handleChange, resetForm } = useForm({
+    email: "",
+    password: "",
+  });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  useEffect(() => {
+    if (isOpen) {
+      resetForm({ email: "", password: "" }, {}, false);
+      setError?.(null);
+    }
+  }, [isOpen, resetForm, setError]);
+
+  const onInputChange = (e) => {
     setError?.(null);
-    setForm((prev) => ({ ...prev, [name]: value }));
+    handleChange(e);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    await onLogin(form);
-    setIsSubmitting(false);
+    setError?.(null);
+    await onLogin(values);
   };
 
   if (!isOpen) return null;
@@ -26,45 +34,41 @@ function LoginModal({ isOpen, onClose, onLogin, error, setError, onSecondary }) 
     <ModalWithForm
       name="login"
       title="Log in"
-      buttonText={isSubmitting ? "Logging in..." : "Log in"}
+      buttonText="Log in"
       secondaryButtonText="or Register"
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}
       onSecondary={onSecondary}
+      isSubmitDisabled={!isValid}
     >
-      <label
-        className={`form__field space ${
-          error === "EMAIL_NOT_FOUND" ? "error" : ""
-        }`}
-      >
+      <label className={`form__field space ${error === "EMAIL_NOT_FOUND" ? "error" : ""}`}>
         <span>{error === "EMAIL_NOT_FOUND" ? "User not found" : "Email"}</span>
         <input
-          className="form__control"
+          className={`form__control ${errors.email ? "form__control_state_error" : ""}`}
           type="email"
           name="email"
           placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
+          value={values.email}
+          onChange={onInputChange}
           required
         />
+        {errors.email && <span className="form__error">{errors.email}</span>}
       </label>
 
-      <label
-        className={`form__field ${error === "WRONG_PASSWORD" ? "error" : ""}`}
-      >
-        <span>
-          {error === "WRONG_PASSWORD" ? "Incorrect Password" : "Password"}
-        </span>
+      <label className={`form__field ${error === "WRONG_PASSWORD" ? "error" : ""}`}>
+        <span>{error === "WRONG_PASSWORD" ? "Incorrect Password" : "Password"}</span>
         <input
-          className="form__control"
+          className={`form__control ${errors.password ? "form__control_state_error" : ""}`}
           type="password"
           name="password"
           placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
+          value={values.password}
+          onChange={onInputChange}
+          minLength={6}
           required
         />
+        {errors.password && <span className="form__error">{errors.password}</span>}
       </label>
     </ModalWithForm>
   );

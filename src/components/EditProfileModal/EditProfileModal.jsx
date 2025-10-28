@@ -1,35 +1,39 @@
 // src/components/EditProfileModal.jsx
-import { useState, useEffect, useContext } from "react";
+import { useEffect, useContext } from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
 import CurrentUserContext from "../../contexts/CurrentUserContext";
+import { useForm } from "../../hooks/useForm";
 
 function EditProfileModal({ isOpen, onClose, onUpdateUser, error, setError }) {
   const currentUser = useContext(CurrentUserContext);
 
-  const [form, setForm] = useState({ name: "", avatar: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Hook requerido
+  const { values, errors, isValid, handleChange, resetForm } = useForm({
+    name: "",
+    avatar: "",
+  });
 
-  // Fill form with current user data when modal opens
+  // Prellenar con datos del usuario al abrir
   useEffect(() => {
     if (isOpen && currentUser) {
-      setForm({
-        name: currentUser.name || "",
-        avatar: currentUser.avatar || "",
-      });
+      resetForm(
+        { name: currentUser.name || "", avatar: currentUser.avatar || "" },
+        {},
+        true
+      );
+      setError?.(null);
     }
-  }, [isOpen, currentUser]);
+  }, [isOpen, currentUser, resetForm, setError]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setError(null);
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const onInputChange = (e) => {
+    setError?.(null);
+    handleChange(e);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    await onUpdateUser(form); // Pass form data to parent handler
-    setIsSubmitting(false);
+    setError?.(null);
+    await onUpdateUser(values);
   };
 
   if (!isOpen) return null;
@@ -38,41 +42,46 @@ function EditProfileModal({ isOpen, onClose, onUpdateUser, error, setError }) {
     <ModalWithForm
       name="edit-profile"
       title="Edit Profile"
-      buttonText={isSubmitting ? "Saving..." : "Save"}
+      buttonText="Save"
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}
+      // si tu ModalWithForm lo soporta:
+      isSubmitDisabled={!isValid}
     >
-      <label className={`form__field`}>
+      <label className="form__field">
         <span>Name</span>
         <input
-          className="form__control"
+          className={`form__control ${errors.name ? "form__control_state_error" : ""}`}
           type="text"
           name="name"
           placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
+          value={values.name}
+          onChange={onInputChange}
+          minLength={2}
+          maxLength={30}
           required
         />
+        {errors.name && <span className="form__error">{errors.name}</span>}
       </label>
 
-      <label
-        className={`form__field ${
-          error === "INVALID_AVATAR_URL" ? "error" : ""
-        }`}
-      >
-        <span>
-          {error === "INVALID_AVATAR_URL" ? "Invalid avatar URL" : "Avatar URL"}
-        </span>
+      <label className={`form__field ${error === "INVALID_AVATAR_URL" ? "error" : ""}`}>
+        <span>{error === "INVALID_AVATAR_URL" ? "Invalid avatar URL" : "Avatar URL"}</span>
         <input
-          className="form__control"
+          className={`form__control ${
+            errors.avatar || error === "INVALID_AVATAR_URL" ? "form__control_state_error" : ""
+          }`}
           type="url"
           name="avatar"
           placeholder="Avatar URL"
-          value={form.avatar}
-          onChange={handleChange}
+          value={values.avatar}
+          onChange={onInputChange}
+          pattern="https?://.+"
           required
         />
+        {(errors.avatar || error === "INVALID_AVATAR_URL") && (
+          <span className="form__error">{errors.avatar || "Please enter a valid URL."}</span>
+        )}
       </label>
     </ModalWithForm>
   );
