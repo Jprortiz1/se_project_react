@@ -1,33 +1,35 @@
 // src/components/RegisterModal/RegisterModal.jsx
+import { useState } from "react";
 import "./RegisterModal.css";
-import { useEffect } from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
-import { useForm } from "../../hooks/useForm";
 
-function RegisterModal({ isOpen, onClose, onRegister, onSecondary, error, setError }) {
-  const { values, errors, isValid, handleChange, resetForm } = useForm({
+function RegisterModal({
+  isOpen,
+  onClose,
+  onRegister,
+  onSecondary,
+  error,
+  setError,
+}) {
+  const [form, setForm] = useState({
     name: "",
     avatar: "",
     email: "",
     password: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      resetForm({ name: "", avatar: "", email: "", password: "" }, {}, false);
-      setError?.(null);
-    }
-  }, [isOpen, resetForm, setError]);
-
-  const onInputChange = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setError?.(null);
-    handleChange(e);
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError?.(null);
-    await onRegister(values);
+    setIsSubmitting(true);
+    await onRegister(form);
+    setIsSubmitting(false);
   };
 
   if (!isOpen) return null;
@@ -36,75 +38,74 @@ function RegisterModal({ isOpen, onClose, onRegister, onSecondary, error, setErr
     <ModalWithForm
       name="register"
       title="Sign Up"
-      buttonText="Next"
+      buttonText={isSubmitting ? "Signing Up..." : "Next"}
       secondaryButtonText="or Log in"
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit}
       onSecondary={onSecondary}
-      isSubmitDisabled={!isValid}
     >
-      <label className={`form__field space ${error === "EMAIL_IN_USE" ? "error" : ""}`}>
-        <span>{error === "EMAIL_IN_USE" ? "Email already registered" : "Email"}</span>
+      <label
+        className={`form__field space ${
+          error === "EMAIL_IN_USE" ? "error" : ""
+        }`}
+      >
+        <span>
+          {error === "EMAIL_IN_USE" ? "Email already registered" : "Email"}
+        </span>
         <input
-          className={`form__control ${errors.email ? "form__control_state_error" : ""}`}
+          className="form__control"
           type="email"
           name="email"
           placeholder="Email"
-          value={values.email}
-          onChange={onInputChange}
+          value={form.email}
+          onChange={handleChange}
           required
         />
-        {errors.email && <span className="form__error">{errors.email}</span>}
       </label>
 
       <label className="form__field">
         <span>Password</span>
         <input
-          className={`form__control ${errors.password ? "form__control_state_error" : ""}`}
+          className="form__control"
           type="password"
           name="password"
           placeholder="Password"
-          value={values.password}
-          onChange={onInputChange}
-          minLength={6}
+          value={form.password}
+          onChange={handleChange}
           required
         />
-        {errors.password && <span className="form__error">{errors.password}</span>}
       </label>
 
       <label className="form__field">
         <span>Name</span>
         <input
-          className={`form__control ${errors.name ? "form__control_state_error" : ""}`}
+          className="form__control"
           type="text"
           name="name"
           placeholder="Name"
-          value={values.name}
-          onChange={onInputChange}
-          minLength={2}
-          maxLength={30}
+          value={form.name}
+          onChange={handleChange}
           required
         />
-        {errors.name && <span className="form__error">{errors.name}</span>}
       </label>
 
-      <label className={`form__field ${error === "INVALID_AVATAR_URL" ? "error" : ""}`}>
-        <span>{error === "INVALID_AVATAR_URL" ? "Invalid avatar URL" : "Avatar URL"}</span>
+      <label
+        className={`form__field ${
+          error === "INVALID_AVATAR_URL" ? "error" : ""
+        }`}
+      >
+        <span>
+          {error === "INVALID_AVATAR_URL" ? "Invalid avatar URL" : "Avatar URL"}
+        </span>
         <input
-          className={`form__control ${
-            errors.avatar || error === "INVALID_AVATAR_URL" ? "form__control_state_error" : ""
-          }`}
+          className="form__control"
           type="url"
           name="avatar"
-          placeholder="https://example.com/photo.jpg"
-          value={values.avatar}
-          onChange={onInputChange}
-          pattern="https?://.+"
+          placeholder="Avatar URL"
+          value={form.avatar}
+          onChange={handleChange}
         />
-        {(errors.avatar || error === "INVALID_AVATAR_URL") && (
-          <span className="form__error">{errors.avatar || "Please enter a valid URL."}</span>
-        )}
       </label>
     </ModalWithForm>
   );
