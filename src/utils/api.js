@@ -3,7 +3,7 @@
 // Usa variable de entorno si existe; si no, localhost:3001
 export const baseUrl =
   (import.meta.env?.VITE_API_URL && import.meta.env.VITE_API_URL.trim()) ||
-  "http://api.gcp-prueba.crabdance.com/";
+  "http://api.gcp-prueba.crabdance.com";
 
 /**
  * checkResponse
